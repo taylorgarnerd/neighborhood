@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+	<title>When In Rome</title>
+	<link href="css/stylesheet.css" rel="stylesheet" />
+</head>
+<body>
+	<div id="listcontainer">
+		<h2>Itinerary</h2>
+		<div data-bind="foreach: locations">
+			<div class="itinerary" data-bind="text: name, click: $parent.changeView"></div>
+		</div>
+	</div>
+	<div id="map" data-bind="map:mapView"></div>
+	<div id="searchcontainer">
+		<form>
+			<input id="searchbar" type="text" placeholder="Search for a location...">
+		</form>
+		<p>Location not found</p>
+	</div>
+	<script src="https://maps.googleapis.com/maps/api/js"></script>
+	<script src="js/lib/jquery-2.2.1.min.js"></script>
+	<script src="js/lib/knockout-3.4.0.js"></script>
+	<script src="js/app.js"></script>
+</body>
+</html>
