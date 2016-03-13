@@ -8,10 +8,10 @@
 	<div id="listcontainer">
 		<h2>Itinerary</h2>
 		<div data-bind="foreach: locations">
-			<div class="itinerary" data-bind="text: name, click: $parent.changeView"></div>
+			<div class="itinerary" data-bind="text: name, click: $parent.reCenter"></div>
 		</div>
 	</div>
-	<div id="map" data-bind="map:mapView"></div>
+	<div id="map"></div>
 	<div id="searchcontainer">
 		<form>
 			<input id="searchbar" type="text" placeholder="Search for a location...">
