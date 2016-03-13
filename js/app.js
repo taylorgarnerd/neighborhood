@@ -17,7 +17,7 @@ var initialLocations = [
 ]
 
 var map = new google.maps.Map(document.getElementById('map'), {
-    center: {lat: 43.2709639, lng: 11.8606963},
+    center: {lat: initialLocations[0].lat, lng: initialLocations[0].lng},
     zoom: 7,
     mapTypeId: google.maps.MapTypeId.ROADMAP,
     mapTypeControl: false,
@@ -35,10 +35,29 @@ initialLocations.forEach(function (loc) {
 var ViewModel = function () {
 	var self = this;
 
-    self.locations = initialLocations;
+    self.locations = ko.observableArray(initialLocations);
 
     self.reCenter = function (loc) {
         map.setCenter({lat: loc.lat, lng: loc.lng});
+        map.setStreetView(new google.maps.StreetViewPanorama(
+            document.getElementById('streetview'), {
+                position: {lat: loc.lat, lng: loc.lng},
+                pov: {
+                  heading: 34,
+                  pitch: 10
+                }
+            }));
+    }
+
+    self.streetView = function (loc) {
+        map.setStreetView(new google.maps.StreetViewPanorama(
+            document.getElementById('streetview'), {
+                position: {lat: loc.lat, lng: loc.lng},
+                pov: {
+                  heading: 34,
+                  pitch: 10
+                }
+            }));
     }
 
 }

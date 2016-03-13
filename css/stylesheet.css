@@ -63,3 +63,16 @@ p {
 	background-color: #ffffff;
 	opacity: 0.9;
 }
+
+#streetview {
+	position: absolute;
+	width: 400px;
+	height: 300px;
+	bottom: 25px;
+	right: 50px;
+	background-color: white;
+}
+
+.hidden {
+	display: none;
+}
