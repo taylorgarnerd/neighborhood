@@ -16,30 +16,45 @@ var initialLocations = [
     }
 ]
 
-var map = new google.maps.Map(document.getElementById('map'), {
-    center: {lat: initialLocations[0].lat, lng: initialLocations[0].lng},
-    zoom: 7,
-    mapTypeId: google.maps.MapTypeId.ROADMAP,
-    mapTypeControl: false,
-    streetViewControl: false
-});
 
-initialLocations.forEach(function (loc) {
-        map.marker = new google.maps.Marker ({
-            map: map,
-            position: {lat: loc.lat, lng: loc.lng},
-            title: this.name
-        });
-    });
+
+var Location = function (data) {
+    this.name = data.name;
+    this.lat = data.lat;
+    this.lng = data.lng;
+    this.searched = ko.observable(true);
+}
 
 var ViewModel = function () {
 	var self = this;
+    self.streetview = ko.observable(false);
+    self.searchAlert = ko.observable(false);
+    var search = $('#searchbar');
 
-    self.locations = ko.observableArray(initialLocations);
+    self.map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: 42.6900566, lng: 11.8679232},
+        zoom: 7,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        mapTypeControl: false,
+        streetViewControl: false
+    });
+
+    self.locations = ko.observableArray([]);
+    initialLocations.forEach(function (loc) {
+        self.map.marker = new google.maps.Marker ({
+            map: self.map,
+            position: {lat: loc.lat, lng: loc.lng},
+            title: loc.name,
+            animation: google.maps.Animation.DROP,
+        });
+
+        self.locations.push(new Location(loc));
+    });
 
     self.reCenter = function (loc) {
-        map.setCenter({lat: loc.lat, lng: loc.lng});
-        map.setStreetView(new google.maps.StreetViewPanorama(
+        self.streetview(true);
+        self.map.setCenter({lat: loc.lat, lng: loc.lng});
+        self.map.setStreetView(new google.maps.StreetViewPanorama(
             document.getElementById('streetview'), {
                 position: {lat: loc.lat, lng: loc.lng},
                 pov: {
@@ -49,15 +64,30 @@ var ViewModel = function () {
             }));
     }
 
-    self.streetView = function (loc) {
-        map.setStreetView(new google.maps.StreetViewPanorama(
-            document.getElementById('streetview'), {
-                position: {lat: loc.lat, lng: loc.lng},
-                pov: {
-                  heading: 34,
-                  pitch: 10
+    self.searchResults = function () {
+        var searchVal = search.val().toLowerCase();
+        var hits = 0;
+        var anyFound = false;
+
+        self.locations().forEach(function (loc) {
+            if (loc.name.toLowerCase().indexOf(searchVal) >= 0 || searchVal == '') {
+                hits++;
+                loc.searched(true);
+                if (!anyFound) {
+                    self.reCenter(loc);
+                    self.searchAlert(false);
+                    anyFound = true;
                 }
-            }));
+            } else {
+                loc.searched(false);
+            }
+
+        });
+        
+        if (hits == 0) {
+            self.searchAlert(true);
+            console.log(self.searchAlert());
+        }
     }
 
 }
