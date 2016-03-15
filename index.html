@@ -14,7 +14,7 @@
 	<div id="map"></div>
 	<div id="searchcontainer">
 		<form data-bind="submit: searchResults">
-			<input id="searchbar" type="text" placeholder="Search for a location...">
+			<input id="searchbar" type="text" placeholder="Search for a location..." data-bind="value: search">
 		</form>
 		<div id="searchmessage" style="display: none;" data-bind="visible: true">
 			<p data-bind="visible: searchAlert">Location not found</p>

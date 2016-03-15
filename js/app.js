@@ -29,7 +29,7 @@ var ViewModel = function () {
 	var self = this;
     self.streetview = ko.observable(false);
     self.searchAlert = ko.observable(false);
-    var search = $('#searchbar');
+    self.search = '';
 
     self.map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: 42.6900566, lng: 11.8679232},
@@ -65,7 +65,7 @@ var ViewModel = function () {
     }
 
     self.searchResults = function () {
-        var searchVal = search.val().toLowerCase();
+        var searchVal = self.search.toLowerCase();
         var hits = 0;
         var anyFound = false;
 
@@ -86,7 +86,6 @@ var ViewModel = function () {
         
         if (hits == 0) {
             self.searchAlert(true);
-            console.log(self.searchAlert());
         }
     }
 
