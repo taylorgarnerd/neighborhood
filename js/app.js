@@ -31,37 +31,17 @@ var ViewModel = function () {
     self.searchAlert = ko.observable(false);
     self.search = '';
 
-    // self.map = new google.maps.Map(document.getElementById('map'), {
-    //     center: {lat: 42.6900566, lng: 11.8679232},
-    //     zoom: 7,
-    //     mapTypeId: google.maps.MapTypeId.ROADMAP,
-    //     mapTypeControl: false,
-    //     streetViewControl: false
-    // });
-
     self.locations = ko.observableArray([]);
     initialLocations.forEach(function (loc) {
         self.locations.push(new Location(loc));
     });
 
-    self.map = self.locations();
-
-    // self.locations = ko.observableArray([]);
-    // initialLocations.forEach(function (loc) {
-    //     self.map.marker = new google.maps.Marker ({
-    //         map: self.map,
-    //         position: {lat: loc.lat, lng: loc.lng},
-    //         title: loc.name,
-    //         animation: google.maps.Animation.DROP,
-    //     });
-
-    //     self.locations.push(new Location(loc));
-    // });
+    self.map = self.locations;
 
     self.reCenter = function (loc) {
         self.streetview(true);
-        self.map.setCenter({lat: loc.lat, lng: loc.lng});
-        self.map.setStreetView(new google.maps.StreetViewPanorama(
+        self.map().googleMap.setCenter({lat: loc.lat, lng: loc.lng});
+        self.map().googleMap.setStreetView(new google.maps.StreetViewPanorama(
             document.getElementById('streetview'), {
                 position: {lat: loc.lat, lng: loc.lng},
                 pov: {
@@ -119,6 +99,7 @@ ko.bindingHandlers.map = {
             });
         });
     }
+
 }
 
 
