@@ -31,25 +31,32 @@ var ViewModel = function () {
     self.searchAlert = ko.observable(false);
     self.search = '';
 
-    self.map = new google.maps.Map(document.getElementById('map'), {
-        center: {lat: 42.6900566, lng: 11.8679232},
-        zoom: 7,
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
-        mapTypeControl: false,
-        streetViewControl: false
-    });
+    // self.map = new google.maps.Map(document.getElementById('map'), {
+    //     center: {lat: 42.6900566, lng: 11.8679232},
+    //     zoom: 7,
+    //     mapTypeId: google.maps.MapTypeId.ROADMAP,
+    //     mapTypeControl: false,
+    //     streetViewControl: false
+    // });
 
     self.locations = ko.observableArray([]);
     initialLocations.forEach(function (loc) {
-        self.map.marker = new google.maps.Marker ({
-            map: self.map,
-            position: {lat: loc.lat, lng: loc.lng},
-            title: loc.name,
-            animation: google.maps.Animation.DROP,
-        });
-
         self.locations.push(new Location(loc));
     });
+
+    self.map = self.locations();
+
+    // self.locations = ko.observableArray([]);
+    // initialLocations.forEach(function (loc) {
+    //     self.map.marker = new google.maps.Marker ({
+    //         map: self.map,
+    //         position: {lat: loc.lat, lng: loc.lng},
+    //         title: loc.name,
+    //         animation: google.maps.Animation.DROP,
+    //     });
+
+    //     self.locations.push(new Location(loc));
+    // });
 
     self.reCenter = function (loc) {
         self.streetview(true);
@@ -90,5 +97,29 @@ var ViewModel = function () {
     }
 
 }
+
+ko.bindingHandlers.map = {
+    init: function (element, valueAccessor, allBindingsAccessor, viewModel) {
+        var mapArray = ko.utils.unwrapObservable(valueAccessor());
+
+        mapArray.googleMap = new google.maps.Map(element, {
+            center: {lat: 42.6900566, lng: 11.8679232},
+            zoom: 7,
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            mapTypeControl: false,
+            streetViewControl: false
+        });
+
+        mapArray.forEach(function (loc) {
+            mapArray.marker = new google.maps.Marker ({
+                map: mapArray.googleMap,
+                position: {lat: loc.lat, lng: loc.lng},
+                title: loc.name,
+                animation: google.maps.Animation.DROP,
+            });
+        });
+    }
+}
+
 
 ko.applyBindings(new ViewModel());
