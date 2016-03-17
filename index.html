@@ -7,20 +7,20 @@
 <body>
 	<div id="listcontainer">
 		<h2>Itinerary</h2>
-		<div data-bind="foreach: locations">
-			<div class="itinerary" data-bind="text: name, visible: searched, click: $parent.reCenter"></div>
+		<div data-bind="foreach: currentLocations">
+			<div class="itinerary" data-bind="text: name, click: $parent.reCenter"></div>
 		</div>
 	</div>
 	<div id="map" data-bind="map: map"></div>
 	<div id="searchcontainer">
-		<form data-bind="submit: searchResults">
+		<form data-bind="submit: submit">
 			<input id="searchbar" type="text" placeholder="Search for a location..." data-bind="value: search">
 		</form>
 		<div id="searchmessage" style="display: none;" data-bind="visible: true">
 			<p data-bind="visible: searchAlert">Location not found</p>
 		</div>
 	</div>	
-	<div id="streetview" data-bind="visible: streetview"></div>
+	<div id="streetview" data-bind="streetViewAndCenter: streetViewAndCenter, visible: center"></div>
 	<script src="https://maps.googleapis.com/maps/api/js"></script>
 	<script src="js/lib/jquery-2.2.1.min.js"></script>
 	<script src="js/lib/knockout-3.4.0.js"></script>
