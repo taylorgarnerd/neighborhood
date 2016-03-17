@@ -36,13 +36,13 @@ var ViewModel = function () {
     self.search = ko.observable('');
 
     //Represents the full list of locations. Adds new Location objects from the model
-    self.locations = ko.observableArray([]);
+    self.locations = [];
     initialLocations.forEach(function (loc) {
         self.locations.push(new Location(loc));
     });
 
     self.currentLocations = ko.computed(function () {
-        return jQuery.grep(self.locations(), function(loc, i) {
+        return jQuery.grep(self.locations, function(loc, i) {
             return (loc.name.toLowerCase().indexOf(self.search().toLowerCase()) >= 0)
         })
     });
@@ -89,7 +89,7 @@ ko.bindingHandlers.map = {
         var newLocations = ko.utils. unwrapObservable(valueAccessor());
         var map = viewModel.googleMap;
 
-        viewModel.locations().forEach(function (loc) {
+        viewModel.locations.forEach(function (loc) {
             var check = jQuery.inArray(loc, newLocations);
 
             if (check < 0) {
