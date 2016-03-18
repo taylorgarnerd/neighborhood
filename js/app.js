@@ -141,7 +141,7 @@ ko.bindingHandlers.map = {
         });
     },
 
-    //
+    //Sets marker locations as null or the active Google Map when there are changes to currentLocations
     update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
         var newLocations = ko.utils. unwrapObservable(valueAccessor());
         var map = viewModel.googleMap;
@@ -160,6 +160,8 @@ ko.bindingHandlers.map = {
 
 }
 
+//Initializes Google Maps StreetView
+//Changes StreetView center and map center whenever center changes
 ko.bindingHandlers.streetViewAndCenter = {
     update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
         var center = ko.utils.unwrapObservable(valueAccessor());
