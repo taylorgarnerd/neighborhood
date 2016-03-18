@@ -1,18 +1,58 @@
 var initialLocations = [
     {
-        name: "Cinque Terre",
-        lat: 44.1347938, 
-        lng: 9.6807133
+        name: "Vatican City",
+        lat: 41.9038243, 
+        lng: 12.4476838
     },
     {
-        name: "Rome",
-        lat: 41.897214, 
-        lng: 12.4946613
+        name: "Colosseum - Rome, Italy",
+        lat: 41.8902142, 
+        lng: 12.4900422
     },
     {
-        name: "Florence",
-        lat: 43.7841549, 
-        lng: 11.2604063
+        name: "Spanish Steps - Rome, Italy",
+        lat: 41.905994, 
+        lng: 12.4805863
+    },
+    {
+        name: "Riccardi Medici Palace - Florence, Italy",
+        lat: 43.7751902,
+        lng: 11.2535862
+    },
+    {
+        name: "Uffizi Gallery - Florence, Italy",
+        lat: 43.7677895,
+        lng: 11.2531221
+    },
+    {
+        name: "Galleria dell'Accademia - Florence, Italy",
+        lat: 43.7768209,
+        lng: 11.2565267
+    },
+    {
+        name: "Monterosso al Mare - Cinque Terre",
+        lat: 44.1452226,
+        lng: 9.6466341
+    },
+    {
+        name: "Vernazza - Cinque Terre",
+        lat: 44.1364165,
+        lng: 9.6849488
+    },
+    {
+        name: "Corniglia - Cinque Terre",
+        lat: 44.1202756,
+        lng: 9.7090253
+    },
+    {
+        name: "Manarola - Cinque Terre",
+        lat: 44.1067484,
+        lng: 9.7271632
+    },
+    {
+        name: "Riomaggiore - Cinque Terre",
+        lat: 44.0996562,
+        lng: 9.7365744   
     }
 ]
 
@@ -41,27 +81,34 @@ var ViewModel = function () {
         self.locations.push(new Location(loc));
     });
 
+    //Returns an array of Location objects where self.search is in Location.name
     self.currentLocations = ko.computed(function () {
         return jQuery.grep(self.locations, function(loc, i) {
             return (loc.name.toLowerCase().indexOf(self.search().toLowerCase()) >= 0)
         })
     });
 
+    //Observable that centers the map. Initially set to the first Location's position
+    //If null, the streetview div will be hidden
     self.center = ko.observable({lat: self.currentLocations()[0].lat, lng: self.currentLocations()[0].lng})
 
+    //Initializes the Google Map and passes the currentLocations array to it to update markers
     self.map = self.currentLocations;
 
+    //Initializes the Google Maps StreetView and re-centers the map when self.center is changed
     self.streetViewAndCenter = self.center;
 
+    //Displays an alert message that no locations were found when currentLocations is empty
     self.searchAlert = ko.computed(function () {
         return self.currentLocations().length < 1;
     });
 
+    //Bound to clicks on the list div in the UI
     self.reCenter = function (loc) {
         self.center({lat: loc.lat, lng: loc.lng});
     }
 
-    //Suppresses the default action for Submit on the form containing the search bar
+    //Updates self.center value when a search is submitted
     self.submit = function() {
         if (self.currentLocations().length <= 0) {
             self.center(null);
@@ -72,7 +119,10 @@ var ViewModel = function () {
 
 }
 
+//Binds Google Map to the map div
 ko.bindingHandlers.map = {
+
+    //Initializes the Google Map
     init: function (element, valueAccessor, allBindingsAccessor, viewModel) {
 
         viewModel.googleMap = new google.maps.Map(element, {
@@ -85,6 +135,7 @@ ko.bindingHandlers.map = {
 
     },
 
+    //
     update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
         var newLocations = ko.utils. unwrapObservable(valueAccessor());
         var map = viewModel.googleMap;
