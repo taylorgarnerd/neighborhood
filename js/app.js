@@ -123,6 +123,7 @@ var ViewModel = function () {
 ko.bindingHandlers.map = {
 
     //Initializes the Google Map
+    //Adds listener to recenter the map when a marker is clicked
     init: function (element, valueAccessor, allBindingsAccessor, viewModel) {
 
         viewModel.googleMap = new google.maps.Map(element, {
@@ -133,6 +134,11 @@ ko.bindingHandlers.map = {
             streetViewControl: false
         });
 
+        viewModel.locations.forEach(function (loc) {
+            loc.marker.addListener('click', function () {
+                viewModel.center(loc.marker.getPosition());
+            })
+        });
     },
 
     //
