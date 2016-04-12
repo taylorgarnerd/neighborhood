@@ -62,6 +62,30 @@ p {
 	border: 1px solid gray;
 	background-color: #ffffff;
 	opacity: 0.9;
+	display: flex;
+	justify-content: space-between;
+}
+
+.itinerary:before {
+	content: '✔';
+	visibility: hidden;
+}
+
+.itinerary:before:hover {
+	color: #46a510;
+}
+
+.itinerary:hover:before {
+	visibility: visible;
+}
+
+.itinerary:after {
+	content: '✘';
+	visibility: hidden;
+}
+
+.itinerary:hover:after {
+	visibility: visible;
 }
 
 #streetview {
