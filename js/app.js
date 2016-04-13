@@ -62,11 +62,17 @@ var Location = function (data) {
     this.name = data.name;
     this.lat = data.lat;
     this.lng = data.lng;
+    this.completed = ko.observable(false);
 
     //Adds a Google Map marker to the object with no associated map
     this.marker = new google.maps.Marker ({
         position: {lat: this.lat, lng: this.lng}
     });
+
+    //Handles changing the completed observable when a checkmark is clicked
+    toggleComplete = function() {
+        this.completed(!this.completed());
+    }
 }
 
 var ViewModel = function () {
@@ -78,19 +84,19 @@ var ViewModel = function () {
     //Represents the full list of locations. Adds new Location objects from the model
     self.locations = [];
     initialLocations.forEach(function (loc) {
-        self.locations.push(new Location(loc));
+        self.locations.push(ko.observable(new Location(loc)));
     });
 
     //Returns an array of Location objects where self.search is in Location.name
     self.currentLocations = ko.computed(function () {
         return jQuery.grep(self.locations, function(loc, i) {
-            return (loc.name.toLowerCase().indexOf(self.search().toLowerCase()) >= 0)
+            return (loc().name.toLowerCase().indexOf(self.search().toLowerCase()) >= 0)
         })
     });
 
     //Observable that centers the map. Initially set to the first Location's position
     //If null, the streetview div will be hidden
-    self.center = ko.observable({lat: self.currentLocations()[0].lat, lng: self.currentLocations()[0].lng})
+    self.center = ko.observable({lat: self.currentLocations()[0]().lat, lng: self.currentLocations()[0]().lng})
 
     //Initializes the Google Map and passes the currentLocations array to it to update markers
     self.map = self.currentLocations;
@@ -113,10 +119,9 @@ var ViewModel = function () {
         if (self.currentLocations().length <= 0) {
             self.center(null);
         } else {
-            self.center({lat: self.currentLocations()[0].lat, lng: self.currentLocations()[0].lng});
+            self.center({lat: self.currentLocations()[0]().lat, lng: self.currentLocations()[0]().lng});
         }
     }
-
 }
 
 //Binds Google Map to the map div
@@ -135,25 +140,25 @@ ko.bindingHandlers.map = {
         });
 
         viewModel.locations.forEach(function (loc) {
-            loc.marker.addListener('click', function () {
-                viewModel.center(loc.marker.getPosition());
+            loc().marker.addListener('click', function () {
+                viewModel.center(loc().marker.getPosition());
             })
         });
     },
 
     //Sets marker locations as null or the active Google Map when there are changes to currentLocations
     update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
-        var newLocations = ko.utils. unwrapObservable(valueAccessor());
+        var newLocations = ko.utils.unwrapObservable(valueAccessor());
         var map = viewModel.googleMap;
 
         viewModel.locations.forEach(function (loc) {
             var check = jQuery.inArray(loc, newLocations);
 
             if (check < 0) {
-                loc.marker.setMap(null);
-            } else if (loc.marker.getMap() == null) {
-                loc.marker.setMap(map);
-                loc.marker.setAnimation(google.maps.Animation.DROP);
+                loc().marker.setMap(null);
+            } else if (loc().marker.getMap() == null) {
+                loc().marker.setMap(map);
+                loc().marker.setAnimation(google.maps.Animation.DROP);
             }
         });
     }

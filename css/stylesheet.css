@@ -57,7 +57,7 @@ p {
 	text-shadow: 0.5px 0.5px #cccccc;
 }
 
-.itinerary {
+.itinerary-wrapper {
 	padding: 5px;
 	border: 1px solid gray;
 	background-color: #ffffff;
@@ -66,26 +66,25 @@ p {
 	justify-content: space-between;
 }
 
-.itinerary:before {
-	content: '✔';
-	visibility: hidden;
-}
-
-.itinerary:before:hover {
-	color: #46a510;
-}
-
-.itinerary:hover:before {
+.itinerary-wrapper:hover .complete {
 	visibility: visible;
 }
 
-.itinerary:after {
-	content: '✘';
+.complete {
 	visibility: hidden;
 }
 
-.itinerary:hover:after {
-	visibility: visible;
+.complete:hover {
+	color: #329932;
+	cursor: default;
+}
+
+.remove {
+	visibility: hidden;
+}
+
+.done {
+	text-decoration: line-through;
 }
 
 #streetview {
