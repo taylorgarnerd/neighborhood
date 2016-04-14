@@ -88,26 +88,26 @@ var ViewModel = function () {
     });
 
     //Returns an array of Location objects where self.search is in Location.name
-    self.currentLocations = ko.computed(function () {
-        return jQuery.grep(self.locations, function(loc, i) {
-            return (loc().name.toLowerCase().indexOf(self.search().toLowerCase()) >= 0)
-        })
-    });
+    // self.currentLocations = ko.computed(function () {
+    //     return jQuery.grep(self.locations, function(loc, i) {
+    //         return (loc().name.toLowerCase().indexOf(self.search().toLowerCase()) >= 0)
+    //     })
+    // });
 
     //Observable that centers the map. Initially set to the first Location's position
     //If null, the streetview div will be hidden
-    self.center = ko.observable({lat: self.currentLocations()[0]().lat, lng: self.currentLocations()[0]().lng})
+    self.center = ko.observable({lat: self.locations[0]().lat, lng: self.locations[0]().lng})
 
     //Initializes the Google Map and passes the currentLocations array to it to update markers
-    self.map = self.currentLocations;
+    self.map = self.locations;
 
     //Initializes the Google Maps StreetView and re-centers the map when self.center is changed
     self.streetViewAndCenter = self.center;
 
     //Displays an alert message that no locations were found when currentLocations is empty
-    self.searchAlert = ko.computed(function () {
-        return self.currentLocations().length < 1;
-    });
+    // self.searchAlert = ko.computed(function () {
+    //     return self.currentLocations().length < 1;
+    // });
 
     //Bound to clicks on the list div in the UI
     self.reCenter = function (loc) {
@@ -115,13 +115,15 @@ var ViewModel = function () {
     }
 
     //Updates self.center value when a search is submitted
-    self.submit = function() {
-        if (self.currentLocations().length <= 0) {
-            self.center(null);
-        } else {
-            self.center({lat: self.currentLocations()[0]().lat, lng: self.currentLocations()[0]().lng});
-        }
-    }
+    // self.submit = function() {
+    //     if (self.currentLocations().length <= 0) {
+    //         self.center(null);
+    //     } else {
+    //         self.center({lat: self.currentLocations()[0]().lat, lng: self.currentLocations()[0]().lng});
+    //     }
+    // }
+
+    //self.placesSearch = ko.observable('');
 }
 
 //Binds Google Map to the map div
@@ -181,6 +183,26 @@ ko.bindingHandlers.streetViewAndCenter = {
                     pitch: 10
                 }
             }));
+    }
+}
+
+ko.bindingHandlers.placesSearch = {
+    init: function (element, valueAccessor, allBindingsAccessor, viewModel) {
+        viewModel.searchBox = new google.maps.places.SearchBox(element);
+
+        var map = viewModel.googleMap;
+        
+        map.addListener('bounds_changed', function () {
+            viewModel.searchBox.setBounds(map.getBounds());
+        })
+
+        viewModel.searchBox.addListener('places_changed', function () {
+            
+        })
+    },
+
+    update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
+
     }
 }
 
