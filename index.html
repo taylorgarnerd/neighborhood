@@ -1,14 +1,19 @@
 <!doctype html>
 <html>
 <head>
+	<meta charset="utf-8">
 	<title>When In Rome</title>
 	<link href="css/stylesheet.css" rel="stylesheet" />
 </head>
 <body>
 	<div id="listcontainer">
 		<h2>Itinerary</h2>
-		<div data-bind="foreach: currentLocations">
-			<div class="itinerary" data-bind="text: name, click: $parent.reCenter"></div>
+		<div id="list" data-bind="foreach: currentLocations">
+			<div class="itinerary-wrapper">
+				<div class="complete" data-bind="click: toggleComplete">✔</div>
+				<div data-bind="text: name, click: $parent.reCenter, style: { textDecoration: completed() ? 'line-through' : 'none' }"></div>
+				<div class="remove">✘</div>
+			</div>
 		</div>
 	</div>
 	<div id="map" data-bind="map: map"></div>
