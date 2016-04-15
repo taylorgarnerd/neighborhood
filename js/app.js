@@ -106,6 +106,11 @@ var ViewModel = function () {
     self.submit = function () {
         self.search('');
     }
+
+    self.remove = function (loc) {
+        loc.marker.setMap(null);
+        self.locations.remove(loc);
+    }
 }
 
 //Binds Google Map to the map div

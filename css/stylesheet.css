@@ -74,6 +74,10 @@ p {
 	visibility: visible;
 }
 
+.itinerary-wrapper:hover .remove {
+	visibility: visible;
+}
+
 .itinerary {
 	cursor: pointer;
 }
@@ -91,8 +95,9 @@ p {
 	visibility: hidden;
 }
 
-.done {
-	text-decoration: line-through;
+.remove:hover {
+	color: #850B18;
+	cursor: default;
 }
 
 #streetview {

@@ -12,7 +12,7 @@
 			<div class="itinerary-wrapper">
 				<div class="complete" data-bind="click: toggleComplete">✔</div>
 				<div class="itinerary" data-bind="text: name, click: $parent.reCenter, style: { textDecoration: completed() ? 'line-through' : 'none' }"></div>
-				<div class="remove">✘</div>
+				<div class="remove" data-bind="click: $parent.remove">✘</div>
 			</div>
 		</div>
 	</div>
