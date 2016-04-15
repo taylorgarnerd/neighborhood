@@ -102,6 +102,10 @@ var ViewModel = function () {
     self.reCenter = function (loc) {
         self.center({lat: loc.lat, lng: loc.lng});
     }
+
+    self.submit = function () {
+        self.search('');
+    }
 }
 
 //Binds Google Map to the map div
@@ -128,15 +132,10 @@ ko.bindingHandlers.map = {
 
     //Sets marker locations as null or the active Google Map when there are changes to currentLocations
     update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
-        var newLocations = ko.utils.unwrapObservable(valueAccessor()),
-            map = viewModel.googleMap;
+        var map = viewModel.googleMap;
 
         viewModel.locations().forEach(function (loc) {
-            var check = jQuery.inArray(loc, newLocations);
-
-            if (check < 0) {
-                loc.marker.setMap(null);
-            } else if (loc.marker.getMap() == null) {
+            if (loc.marker.getMap() == null) {
                 loc.marker.setMap(map);
                 loc.marker.setAnimation(google.maps.Animation.DROP);
             }
@@ -150,22 +149,29 @@ ko.bindingHandlers.map = {
 ko.bindingHandlers.streetViewAndCenter = {
     update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
         var center = ko.utils.unwrapObservable(valueAccessor()),
-            map = viewModel.googleMap;
+            map = viewModel.googleMap,
+            sv = new google.maps.StreetViewService();
 
         map.setCenter(center);
 
-        map.setStreetView(new google.maps.StreetViewPanorama(
-            element, {
-                position: center,
-                pov: {
-                    heading: 34,
-                    pitch: 10
-                }
-            }));
+        sv.getPanorama({location: center}, function (data, status) {
+            if (status === google.maps.StreetViewStatus.OK) {
+                $(element).show();
+                map.setStreetView(new google.maps.StreetViewPanorama(
+                    element, {
+                        position: center,
+                        pov: {
+                            heading: 34,
+                            pitch: 10
+                        }
+                    })); 
+            } else {
+                $(element).hide();
+            }
+        });
     }
 }
 
-//Initializes
 ko.bindingHandlers.placesSearch = {
     init: function (element, valueAccessor, allBindingsAccessor, viewModel) {
         viewModel.searchBox = new google.maps.places.SearchBox(element);
@@ -178,11 +184,9 @@ ko.bindingHandlers.placesSearch = {
         })
 
         searchBox.addListener('places_changed', function () {
-            console.log('places changedd');
             var places = searchBox.getPlaces();
 
             if (places.length < 1) {
-                console('im returning');
                 return;
             }
 
@@ -192,10 +196,8 @@ ko.bindingHandlers.placesSearch = {
                 lng: places[0].geometry.location.lng()
             };
 
-            console.log(searchLocation);
-
             viewModel.locations.push(new Location(searchLocation));
-            console.log(viewModel.locations().length);
+            viewModel.center({lat: searchLocation.lat, lng: searchLocation.lng});
 
             viewModel.search('');
         });

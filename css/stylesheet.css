@@ -57,6 +57,10 @@ p {
 	text-shadow: 0.5px 0.5px #cccccc;
 }
 
+#list {
+	max-height: 400px;
+}
+
 .itinerary-wrapper {
 	padding: 5px;
 	border: 1px solid gray;

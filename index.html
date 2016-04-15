@@ -18,11 +18,11 @@
 	</div>
 	<div id="map" data-bind="map: map"></div>
 	<div id="searchcontainer">
-		<form data-bind="submit: search">
+		<form data-bind="submit: submit">
 			<input id="searchbar" type="text" placeholder="Search for a location..." data-bind="placesSearch: search, textInput: search">
 		</form>
 	</div>	
-	<div id="streetview" data-bind="streetViewAndCenter: streetViewAndCenter, visible: center"></div>
+	<div id="streetview" data-bind="streetViewAndCenter: streetViewAndCenter"></div>
 	<script src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
 	<script src="js/lib/jquery-2.2.1.min.js"></script>
 	<script src="js/lib/knockout-3.4.0.js"></script>
