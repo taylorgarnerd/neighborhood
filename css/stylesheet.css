@@ -70,6 +70,10 @@ p {
 	visibility: visible;
 }
 
+.itinerary {
+	cursor: pointer;
+}
+
 .complete {
 	visibility: hidden;
 }
