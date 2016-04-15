@@ -62,6 +62,7 @@ var Location = function (data) {
     this.name = data.name;
     this.lat = data.lat;
     this.lng = data.lng;
+    //Observable for updating formatting when marking a location 'complete'
     this.completed = ko.observable(false);
 
     //Adds a Google Map marker to the object with no associated map
@@ -82,45 +83,24 @@ var ViewModel = function () {
     self.search = ko.observable('');
 
     //Represents the full list of locations. Adds new Location objects from the model
-    self.locations = [];
+    self.locations = ko.observableArray();
     initialLocations.forEach(function (loc) {
-        self.locations.push(ko.observable(new Location(loc)));
-    });
-
-    //Returns an array of Location objects where self.search is in Location.name
-    self.currentLocations = ko.computed(function () {
-        return jQuery.grep(self.locations, function(loc, i) {
-            return (loc().name.toLowerCase().indexOf(self.search().toLowerCase()) >= 0)
-        })
+        self.locations().push(new Location(loc));
     });
 
     //Observable that centers the map. Initially set to the first Location's position
     //If null, the streetview div will be hidden
-    self.center = ko.observable({lat: self.currentLocations()[0]().lat, lng: self.currentLocations()[0]().lng})
+    self.center = ko.observable({lat: self.locations()[0].lat, lng: self.locations()[0].lng})
 
     //Initializes the Google Map and passes the currentLocations array to it to update markers
-    self.map = self.currentLocations;
+    self.map = self.locations();
 
     //Initializes the Google Maps StreetView and re-centers the map when self.center is changed
     self.streetViewAndCenter = self.center;
 
-    //Displays an alert message that no locations were found when currentLocations is empty
-    self.searchAlert = ko.computed(function () {
-        return self.currentLocations().length < 1;
-    });
-
     //Bound to clicks on the list div in the UI
     self.reCenter = function (loc) {
         self.center({lat: loc.lat, lng: loc.lng});
-    }
-
-    //Updates self.center value when a search is submitted
-    self.submit = function() {
-        if (self.currentLocations().length <= 0) {
-            self.center(null);
-        } else {
-            self.center({lat: self.currentLocations()[0]().lat, lng: self.currentLocations()[0]().lng});
-        }
     }
 }
 
@@ -133,32 +113,32 @@ ko.bindingHandlers.map = {
 
         viewModel.googleMap = new google.maps.Map(element, {
             center: viewModel.center(),
-            zoom: 7,
+            zoom: 10,
             mapTypeId: google.maps.MapTypeId.ROADMAP,
             mapTypeControl: false,
             streetViewControl: false
         });
 
-        viewModel.locations.forEach(function (loc) {
-            loc().marker.addListener('click', function () {
-                viewModel.center(loc().marker.getPosition());
+        viewModel.locations().forEach(function (loc) {
+            loc.marker.addListener('click', function () {
+                viewModel.center(loc.marker.getPosition());
             })
         });
     },
 
     //Sets marker locations as null or the active Google Map when there are changes to currentLocations
     update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
-        var newLocations = ko.utils.unwrapObservable(valueAccessor());
-        var map = viewModel.googleMap;
+        var newLocations = ko.utils.unwrapObservable(valueAccessor()),
+            map = viewModel.googleMap;
 
-        viewModel.locations.forEach(function (loc) {
+        viewModel.locations().forEach(function (loc) {
             var check = jQuery.inArray(loc, newLocations);
 
             if (check < 0) {
-                loc().marker.setMap(null);
-            } else if (loc().marker.getMap() == null) {
-                loc().marker.setMap(map);
-                loc().marker.setAnimation(google.maps.Animation.DROP);
+                loc.marker.setMap(null);
+            } else if (loc.marker.getMap() == null) {
+                loc.marker.setMap(map);
+                loc.marker.setAnimation(google.maps.Animation.DROP);
             }
         });
     }
@@ -169,11 +149,12 @@ ko.bindingHandlers.map = {
 //Changes StreetView center and map center whenever center changes
 ko.bindingHandlers.streetViewAndCenter = {
     update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
-        var center = ko.utils.unwrapObservable(valueAccessor());
+        var center = ko.utils.unwrapObservable(valueAccessor()),
+            map = viewModel.googleMap;
 
-        viewModel.googleMap.setCenter(center)
+        map.setCenter(center);
 
-        viewModel.googleMap.setStreetView(new google.maps.StreetViewPanorama(
+        map.setStreetView(new google.maps.StreetViewPanorama(
             element, {
                 position: center,
                 pov: {
@@ -181,6 +162,43 @@ ko.bindingHandlers.streetViewAndCenter = {
                     pitch: 10
                 }
             }));
+    }
+}
+
+//Initializes
+ko.bindingHandlers.placesSearch = {
+    init: function (element, valueAccessor, allBindingsAccessor, viewModel) {
+        viewModel.searchBox = new google.maps.places.SearchBox(element);
+
+        var map = viewModel.googleMap,
+            searchBox = viewModel.searchBox;
+        
+        map.addListener('bounds_changed', function () {
+            searchBox.setBounds(map.getBounds());
+        })
+
+        searchBox.addListener('places_changed', function () {
+            console.log('places changedd');
+            var places = searchBox.getPlaces();
+
+            if (places.length < 1) {
+                console('im returning');
+                return;
+            }
+
+            var searchLocation = {
+                name: places[0].name,
+                lat: places[0].geometry.location.lat(),
+                lng: places[0].geometry.location.lng()
+            };
+
+            console.log(searchLocation);
+
+            viewModel.locations.push(new Location(searchLocation));
+            console.log(viewModel.locations().length);
+
+            viewModel.search('');
+        });
     }
 }
 

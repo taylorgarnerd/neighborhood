@@ -8,25 +8,22 @@
 <body>
 	<div id="listcontainer">
 		<h2>Itinerary</h2>
-		<div id="list" data-bind="foreach: currentLocations">
+		<div id="list" data-bind="foreach: locations">
 			<div class="itinerary-wrapper">
 				<div class="complete" data-bind="click: toggleComplete">✔</div>
-				<div data-bind="text: name, click: $parent.reCenter, style: { textDecoration: completed() ? 'line-through' : 'none' }"></div>
+				<div class="itinerary" data-bind="text: name, click: $parent.reCenter, style: { textDecoration: completed() ? 'line-through' : 'none' }"></div>
 				<div class="remove">✘</div>
 			</div>
 		</div>
 	</div>
 	<div id="map" data-bind="map: map"></div>
 	<div id="searchcontainer">
-		<form data-bind="submit: submit">
-			<input id="searchbar" type="text" placeholder="Search for a location..." data-bind="value: search">
+		<form data-bind="submit: search">
+			<input id="searchbar" type="text" placeholder="Search for a location..." data-bind="placesSearch: search, textInput: search">
 		</form>
-		<div id="searchmessage" style="display: none;" data-bind="visible: true">
-			<p data-bind="visible: searchAlert">Location not found</p>
-		</div>
 	</div>	
 	<div id="streetview" data-bind="streetViewAndCenter: streetViewAndCenter, visible: center"></div>
-	<script src="https://maps.googleapis.com/maps/api/js"></script>
+	<script src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
 	<script src="js/lib/jquery-2.2.1.min.js"></script>
 	<script src="js/lib/knockout-3.4.0.js"></script>
 	<script src="js/app.js"></script>
