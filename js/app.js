@@ -70,6 +70,10 @@ var Location = function (data) {
         position: {lat: this.lat, lng: this.lng}
     });
 
+    this.iw = new google.maps.InfoWindow({
+        content: 'Test'
+    });
+
     //Handles changing the completed observable when a checkmark is clicked
     toggleComplete = function() {
         this.completed(!this.completed());
@@ -90,7 +94,7 @@ var ViewModel = function () {
 
     //Observable that centers the map. Initially set to the first Location's position
     //If null, the streetview div will be hidden
-    self.center = ko.observable({lat: self.locations()[0].lat, lng: self.locations()[0].lng})
+    self.center = ko.observable(self.locations()[0]);
 
     //Initializes the Google Map and passes the currentLocations array to it to update markers
     self.map = self.locations();
@@ -100,7 +104,8 @@ var ViewModel = function () {
 
     //Bound to clicks on the list div in the UI
     self.reCenter = function (loc) {
-        self.center({lat: loc.lat, lng: loc.lng});
+        self.center().iw.close();
+        self.center(loc);
     }
 
     self.submit = function () {
@@ -153,7 +158,8 @@ ko.bindingHandlers.map = {
 //Changes StreetView center and map center whenever center changes
 ko.bindingHandlers.streetViewAndCenter = {
     update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
-        var center = ko.utils.unwrapObservable(valueAccessor()),
+        var location = ko.utils.unwrapObservable(valueAccessor()),
+            center = {lat: location.lat, lng: location.lng},
             map = viewModel.googleMap,
             sv = new google.maps.StreetViewService();
 
@@ -174,6 +180,8 @@ ko.bindingHandlers.streetViewAndCenter = {
                 $(element).hide();
             }
         });
+
+        location.iw.open(map,location.marker);
     }
 }
 
