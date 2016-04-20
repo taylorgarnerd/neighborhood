@@ -76,9 +76,12 @@ var Location = function (data, callback) {
         self.completed(!self.completed());
     }
 
+    //Builds the URL for Wikipedia API using the location name as the title to search
+    //Queries for the article intro and limits it by # of characters to prevent the info window from being too big
     var URL = 'https://en.wikipedia.org/w/api.php?format=json&callback=wikiCallback&action=query&redirects&exintro&prop=extracts&exchars=1500&titles=' 
         + self.name.replace(/ /g,'%20');
 
+    //Wikipedia API call to retrieve article html
     $.ajax(URL, {
         dataType: 'jsonp',
         success: function (response) {
@@ -86,6 +89,7 @@ var Location = function (data, callback) {
 
             $.each(pages, function(key, val) {
                 if (key > 0) {
+                    //Adds an info window to this location object with the article content
                     self.iw = new google.maps.InfoWindow({
                         content: val.extract + '<a href="http://en.wikipedia.org/?curid=' + val.pageid + '">[via Wikipedia.org]</a>',
                     });
@@ -94,6 +98,7 @@ var Location = function (data, callback) {
                 }
             });
 
+            //Optional callback just in case to handle asynchronous request
             if (callback) {
                 callback();
             }
@@ -131,10 +136,13 @@ var ViewModel = function () {
         self.center(loc);
     }
 
+    //Handles search bar submit to prevent page from reloading
     self.submit = function () {
         self.search('');
     }
 
+    //Bound to remove div
+    //Removes the location's marker and removes the location from the locations array
     self.remove = function (loc) {
         loc.marker.setMap(null);
         self.locations.remove(loc);
@@ -205,6 +213,8 @@ ko.bindingHandlers.streetViewAndCenter = {
             }
         });
 
+        //Uses a timer to open info window if one exists for this location
+        //Timer to account for asynchronous AJAX request
         setTimeout(function() {
             if (location.iw) {
                 location.iw.open(map, location.marker);
@@ -213,6 +223,8 @@ ko.bindingHandlers.streetViewAndCenter = {
     }
 }
 
+
+//Initializes places search and binds it to the search box
 ko.bindingHandlers.placesSearch = {
     init: function (element, valueAccessor, allBindingsAccessor, viewModel) {
         viewModel.searchBox = new google.maps.places.SearchBox(element);
@@ -220,6 +232,7 @@ ko.bindingHandlers.placesSearch = {
         var map = viewModel.googleMap,
             searchBox = viewModel.searchBox;
         
+        //Biases search for locations inside map bounds
         map.addListener('bounds_changed', function () {
             searchBox.setBounds(map.getBounds());
         })
@@ -231,20 +244,24 @@ ko.bindingHandlers.placesSearch = {
                 return;
             }
 
+            //New location data
             var searchLocation = {
                 name: places[0].name,
                 lat: places[0].geometry.location.lat(),
                 lng: places[0].geometry.location.lng()
             };
 
+            //Create new Location object, add to locations array, and recenter
             var newloc = new Location(searchLocation);
             viewModel.locations.push(newloc);
             viewModel.reCenter(newloc);
 
+            //Add new marker click listener
             newloc.marker.addListener('click', function() {
                 viewModel.reCenter(newloc);
             });
 
+            //Reset search box text
             viewModel.search('');
         });
     }
