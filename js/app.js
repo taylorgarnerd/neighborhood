@@ -91,7 +91,7 @@ var Location = function (data, callback) {
                 if (key > 0) {
                     //Adds an info window to this location object with the article content
                     self.iw = new google.maps.InfoWindow({
-                        content: val.extract + '<a href="http://en.wikipedia.org/?curid=' + val.pageid + '">[via Wikipedia.org]</a>',
+                        content: val.extract + '<a href="http://en.wikipedia.org/?curid=' + val.pageid + '" target="_blank">[via Wikipedia.org]</a>',
                     });
                 } else {
                     console.log('Did not find article for ' + self.name);
