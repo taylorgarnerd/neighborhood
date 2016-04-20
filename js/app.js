@@ -5,52 +5,52 @@ var initialLocations = [
         lng: 12.4476838
     },
     {
-        name: "Colosseum - Rome, Italy",
+        name: "Colosseum",
         lat: 41.8902142, 
         lng: 12.4900422
     },
     {
-        name: "Spanish Steps - Rome, Italy",
+        name: "Spanish Steps",
         lat: 41.905994, 
         lng: 12.4805863
     },
     {
-        name: "Riccardi Medici Palace - Florence, Italy",
+        name: "Palazzo Medici Riccardi",
         lat: 43.7751902,
         lng: 11.2535862
     },
     {
-        name: "Uffizi Gallery - Florence, Italy",
+        name: "Uffizi Gallery",
         lat: 43.7677895,
         lng: 11.2531221
     },
     {
-        name: "Galleria dell'Accademia - Florence, Italy",
+        name: "Galleria dell'Accademia",
         lat: 43.7768209,
         lng: 11.2565267
     },
     {
-        name: "Monterosso al Mare - Cinque Terre",
+        name: "Monterosso al Mare",
         lat: 44.1452226,
         lng: 9.6466341
     },
     {
-        name: "Vernazza - Cinque Terre",
+        name: "Vernazza",
         lat: 44.1364165,
         lng: 9.6849488
     },
     {
-        name: "Corniglia - Cinque Terre",
+        name: "Corniglia",
         lat: 44.1202756,
         lng: 9.7090253
     },
     {
-        name: "Manarola - Cinque Terre",
+        name: "Manarola",
         lat: 44.1067484,
         lng: 9.7271632
     },
     {
-        name: "Riomaggiore - Cinque Terre",
+        name: "Riomaggiore",
         lat: 44.0996562,
         lng: 9.7365744   
     }
@@ -58,26 +58,47 @@ var initialLocations = [
 
 
 
-var Location = function (data) {
-    this.name = data.name;
-    this.lat = data.lat;
-    this.lng = data.lng;
+var Location = function (data, callback) {
+    var self = this;
+    self.name = data.name;
+    self.lat = data.lat;
+    self.lng = data.lng;
     //Observable for updating formatting when marking a location 'complete'
-    this.completed = ko.observable(false);
+    self.completed = ko.observable(false);
 
     //Adds a Google Map marker to the object with no associated map
-    this.marker = new google.maps.Marker ({
-        position: {lat: this.lat, lng: this.lng}
-    });
-
-    this.iw = new google.maps.InfoWindow({
-        content: 'Test'
+    self.marker = new google.maps.Marker ({
+        position: {lat: self.lat, lng: self.lng}
     });
 
     //Handles changing the completed observable when a checkmark is clicked
-    toggleComplete = function() {
-        this.completed(!this.completed());
+    self.toggleComplete = function() {
+        self.completed(!self.completed());
     }
+
+    var URL = 'https://en.wikipedia.org/w/api.php?format=json&callback=wikiCallback&action=query&redirects&exintro&prop=extracts&exchars=1500&titles=' 
+        + self.name.replace(/ /g,'%20');
+
+    $.ajax(URL, {
+        dataType: 'jsonp',
+        success: function (response) {
+            var pages = response.query.pages;
+
+            $.each(pages, function(key, val) {
+                if (key > 0) {
+                    self.iw = new google.maps.InfoWindow({
+                        content: val.extract + '<a href="http://en.wikipedia.org/?curid=' + val.pageid + '">[via Wikipedia.org]</a>',
+                    });
+                } else {
+                    console.log('Did not find article for ' + self.name);
+                }
+            });
+
+            if (callback) {
+                callback();
+            }
+        }
+    });
 }
 
 var ViewModel = function () {
@@ -85,7 +106,7 @@ var ViewModel = function () {
 
     //Bound to the search bar value
     self.search = ko.observable('');
-
+ 
     //Represents the full list of locations. Adds new Location objects from the model
     self.locations = ko.observableArray();
     initialLocations.forEach(function (loc) {
@@ -104,7 +125,9 @@ var ViewModel = function () {
 
     //Bound to clicks on the list div in the UI
     self.reCenter = function (loc) {
-        self.center().iw.close();
+        if (self.center().iw) {
+            self.center().iw.close();
+        }
         self.center(loc);
     }
 
@@ -116,6 +139,7 @@ var ViewModel = function () {
         loc.marker.setMap(null);
         self.locations.remove(loc);
     }
+
 }
 
 //Binds Google Map to the map div
@@ -135,7 +159,7 @@ ko.bindingHandlers.map = {
 
         viewModel.locations().forEach(function (loc) {
             loc.marker.addListener('click', function () {
-                viewModel.center(loc.marker.getPosition());
+                viewModel.reCenter(loc);
             })
         });
     },
@@ -181,7 +205,11 @@ ko.bindingHandlers.streetViewAndCenter = {
             }
         });
 
-        location.iw.open(map,location.marker);
+        setTimeout(function() {
+            if (location.iw) {
+                location.iw.open(map, location.marker);
+            }
+        }, 500);
     }
 }
 
@@ -209,8 +237,13 @@ ko.bindingHandlers.placesSearch = {
                 lng: places[0].geometry.location.lng()
             };
 
-            viewModel.locations.push(new Location(searchLocation));
-            viewModel.center({lat: searchLocation.lat, lng: searchLocation.lng});
+            var newloc = new Location(searchLocation);
+            viewModel.locations.push(newloc);
+            viewModel.reCenter(newloc);
+
+            newloc.marker.addListener('click', function() {
+                viewModel.reCenter(newloc);
+            });
 
             viewModel.search('');
         });
